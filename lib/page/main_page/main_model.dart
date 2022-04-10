@@ -1,4 +1,3 @@
-import 'package:app_tracker_search/repo/icon_repo.dart';
 import 'package:app_tracker_search/repo/search_repo.dart';
 import 'package:app_tracker_search/types/search_list.dart';
 import 'package:flutter/material.dart';
@@ -9,8 +8,6 @@ class MainModel with ChangeNotifier {
   bool first = true;
   bool searching = false;
   bool empty = true;
-
-  String? currIconUrl;
 
   search(String appName) async {
     if (appName.isEmpty) {
@@ -37,10 +34,5 @@ class MainModel with ChangeNotifier {
       searching: ${searching}
       empty: ${empty}
     """);
-  }
-
-  getIconUrl(String packageName) async {
-    currIconUrl = await IconRepo().getIconUrl(packageName);
-    notifyListeners();
   }
 }

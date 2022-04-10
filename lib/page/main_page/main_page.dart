@@ -53,7 +53,6 @@ class _MainPage extends StatelessWidget {
                     itemBuilder: (BuildContext context, int index) {
                       return SearchItem(
                         context.watch<MainModel>().searchListData![index],
-                        Provider.of(context),
                       );
                     }),
               );

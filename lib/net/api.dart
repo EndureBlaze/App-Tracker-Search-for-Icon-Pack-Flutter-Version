@@ -40,7 +40,7 @@ class Api {
     });
   }
 
-  Future<Response> getIconUrl(String packageName) {
+  Future<Response> getIcon(String packageName) {
     return _dio.get('/appIcon', queryParameters: {
       'packageName': packageName,
     });
