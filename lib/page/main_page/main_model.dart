@@ -28,11 +28,5 @@ class MainModel with ChangeNotifier {
     searchListData = result;
     searching = false;
     notifyListeners();
-    print("""
-      searchListData: ${searchListData}
-      first: ${first}
-      searching: ${searching}
-      empty: ${empty}
-    """);
   }
 }

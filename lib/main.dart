@@ -1,8 +1,14 @@
+import 'package:app_tracker_search/model/icon_model.dart';
 import 'package:app_tracker_search/page/main_page/main_page.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    MultiProvider(providers: [
+      ChangeNotifierProvider(create: (context) => IconModel()),
+    ], child: const MyApp()),
+  );
 }
 
 class MyApp extends StatelessWidget {

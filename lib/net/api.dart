@@ -1,5 +1,3 @@
-import 'package:app_tracker_search/repo/search_repo.dart';
-import 'package:app_tracker_search/types/search_response.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:app_tracker_search/net/intercept.dart' as interceptor;

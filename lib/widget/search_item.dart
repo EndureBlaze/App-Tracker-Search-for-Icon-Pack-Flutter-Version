@@ -1,76 +1,49 @@
-import 'dart:io';
-
+import 'package:app_tracker_search/model/icon_model.dart';
 import 'package:app_tracker_search/types/search_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:provider/provider.dart';
 
-class SearchItem extends StatefulWidget {
+class SearchItem extends StatelessWidget {
   final SearchListData data;
   const SearchItem(this.data, {Key? key}) : super(key: key);
 
-  @override
-  State<SearchItem> createState() => _SearchItemState();
-}
-
-class _SearchItemState extends State<SearchItem> {
-  Future<void> saveIcon(String imageUrl) {
-    return Future(() async {
-      var bytes = (await NetworkAssetBundle(Uri.parse(imageUrl)).load(imageUrl))
-          .buffer
-          .asUint8List();
-      var cachePath = await getTemporaryDirectory();
-      var file = File('${cachePath.path}/${widget.data.packageName}.png');
-      await file.writeAsBytes(bytes);
+  Widget _icon(BuildContext context) {
+    return Consumer<IconModel>(builder: (context, model, child) {
+      if (context
+          .watch<IconModel>()
+          .icons
+          .where((element) => element.packageName == data.packageName)
+          .isEmpty) {
+        return const CircularProgressIndicator();
+      } else {
+        return Image.memory(
+          context
+              .watch<IconModel>()
+              .icons
+              .where((element) => element.packageName == data.packageName)
+              .first
+              .icon,
+          width: 150,
+          height: 150,
+        );
+      }
     });
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: () {
-        Clipboard.setData(ClipboardData(text: widget.data.activityName));
-        const snackBar = SnackBar(
-          content: Text('已复制启动项'),
-        );
-        ScaffoldMessenger.of(context).showSnackBar(snackBar);
-      },
-      onDoubleTap: () {
-        showIcon();
-      },
-      onLongPress: () {
-        copyMore(context);
-      },
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('应用名：${widget.data.appName}'),
-            Text('包名：${widget.data.packageName}'),
-            Text('启动项：${widget.data.activityName}'),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void showIcon() async {
+  void showIcon(BuildContext context) async {
+    context.read<IconModel>().getIcon(data.packageName);
     showDialog(
         context: context,
-        builder: (context) {
+        builder: (_) {
           return AlertDialog(
-            title: Text(widget.data.appName),
-            content: Image.network(
-              'https://bot.k2t3k.tk/api/appIcon?packageName=${widget.data.packageName}',
-              height: 150,
-              width: 150,
-            ),
+            title: Text(data.appName),
+            content: _icon(context),
             actions: [
               TextButton(
                 onPressed: () async {
-                  await saveIcon(
-                      'https://bot.k2t3k.tk/api/appIcon?packageName=${widget.data.packageName}');
+                  // await saveIcon(
+                  //     'https://bot.k2t3k.tk/api/appIcon?packageName=${data.packageName}');
                   const snackBar = SnackBar(
                     content: Text('保存成功'),
                   );
@@ -131,14 +104,14 @@ class _SearchItemState extends State<SearchItem> {
     if (i != null) {
       switch (i) {
         case 1:
-          Clipboard.setData(ClipboardData(text: widget.data.packageName));
+          Clipboard.setData(ClipboardData(text: data.packageName));
           const snackBar = SnackBar(
             content: Text('已复制包名'),
           );
           ScaffoldMessenger.of(context).showSnackBar(snackBar);
           break;
         case 2:
-          Clipboard.setData(ClipboardData(text: widget.data.activityName));
+          Clipboard.setData(ClipboardData(text: data.activityName));
           const snackBar = SnackBar(
             content: Text('已复制启动项'),
           );
@@ -147,7 +120,7 @@ class _SearchItemState extends State<SearchItem> {
         case 3:
           Clipboard.setData(ClipboardData(
               text:
-                  '<item component="ComponentInfo{${widget.data.packageName}/${widget.data.activityName}}" drawable="${widget.data.appName}"/>'));
+                  '<item component="ComponentInfo{${data.packageName}/${data.activityName}}" drawable="${data.appName}"/>'));
           const snackBar = SnackBar(
             content: Text('复制 appfilter.xml'),
           );
@@ -156,54 +129,34 @@ class _SearchItemState extends State<SearchItem> {
       }
     }
   }
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: () {
+        Clipboard.setData(ClipboardData(text: data.activityName));
+        const snackBar = SnackBar(
+          content: Text('已复制启动项'),
+        );
+        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      },
+      onDoubleTap: () {
+        showIcon(context);
+      },
+      onLongPress: () {
+        copyMore(context);
+      },
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('应用名：${data.appName}'),
+            Text('包名：${data.packageName}'),
+            Text('启动项：${data.activityName}'),
+          ],
+        ),
+      ),
+    );
+  }
 }
-
-// class SearchItem extends StatelessWidget {
-//   final SearchListData data;
-//   const SearchItem(this.data, {Key? key}) : super(key: key);
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return MultiProvider(providers: [
-//       ChangeNotifierProvider(create: (context) => IconModel()),
-//     ], child: _SearchItem(data, context));
-//   }
-// }
-
-// class _SearchItem extends StatelessWidget {
-//   final SearchListData data;
-//   final BuildContext context;
-//   const _SearchItem(this.data, this.context, {Key? key}) : super(key: key);
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return InkWell(
-//       onTap: () {
-//         Clipboard.setData(ClipboardData(text: data.activityName));
-//         const snackBar = SnackBar(
-//           content: Text('已复制启动项'),
-//         );
-//         ScaffoldMessenger.of(context).showSnackBar(snackBar);
-//       },
-//       onDoubleTap: () {
-//         showIcon();
-//       },
-//       onLongPress: () {
-//         copyMore(context);
-//       },
-//       child: Padding(
-//         padding: const EdgeInsets.all(8.0),
-//         child: Column(
-//           crossAxisAlignment: CrossAxisAlignment.start,
-//           children: [
-//             Text('应用名：${data.appName}'),
-//             Text('包名：${data.packageName}'),
-//             Text('启动项：${data.activityName}'),
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-
- 
-// }
